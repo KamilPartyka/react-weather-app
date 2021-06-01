@@ -1,72 +1,117 @@
 import { useState } from 'react';
-import './App.css';
+import {
+  StyledWrapper,
+  StyledInputWrapper,
+  StyledInput,
+  StyledResults,
+  StyledWeather,
+  StyledNoData,
+  StyledMainWeather,
+  StyledAdditionalWeather,
+} from './styles.js';
 
 const APIkey = 'e6a65be06f3391d4b113444a0540b1dc';
-const data = require('./data/current.city.list.min.json');
+const localData = require('./data/current.city.list.min.json');
 
 const App = () => {
   const [inputWord, setInputWord] = useState('');
   const [weatherData, setWeatherData] = useState({});
+  const [emptyCartMsg, setEmptyCartMsg] = useState('Enter city name above');
 
   const handleApi = async (filteredItem) => {
-    const API = `https://api.openweathermap.org/data/2.5/weather?id=${filteredItem.item.id}&units=metric&appid=${APIkey}`;
+    const API = filteredItem
+      ? `https://api.openweathermap.org/data/2.5/weather?id=${filteredItem.item.id}&units=metric&appid=${APIkey}`
+      : `https://api.openweathermap.org/data/2.5/weather?q=${inputWord}&units=metric&appid=${APIkey}`;
 
     try {
       const response = await fetch(API);
+      if (response.status === 404) {
+        setEmptyCartMsg('City name not found, try again');
+      }
       let data = await response.json();
-      console.log(data);
       setWeatherData(data);
     } catch (err) {
-      console.error(`błąd w Api: ${err}`);
+      console.error(`błąd w Api: ${err.status}`);
+      if (err.status !== 404) {
+      }
     }
+    setInputWord('');
   };
+
+  const filterResults = localData.filter((item) =>
+    item.name.toLowerCase().includes(inputWord.toLowerCase())
+  );
 
   return (
     <>
-      <div>
-        <input
-          type="text"
-          placeholder="Search.."
-          onChange={(e) => setInputWord(e.target.value)}
-        />
+      <StyledWrapper>
+        <StyledInputWrapper>
+          <StyledInput
+            type="text"
+            placeholder="Search.."
+            onChange={(e) => setInputWord(e.target.value)}
+            value={inputWord}
+            maxLength={30}
+            onBlur={() => setTimeout(() => setInputWord(''), 100)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleApi();
+              }
+            }}
+          />
 
-        {inputWord.length > 2
-          ? data
-              .filter((item) => {
-                if (item.name.toLowerCase().includes(inputWord.toLowerCase())) {
-                  return item;
-                }
-                return null;
-              })
-              .map((item, key) => (
-                <button key={key} onClick={() => handleApi({ item })}>
-                  {item.name}, {item.country}, {item.id}
-                </button>
-              ))
-          : ''}
-        {typeof weatherData.main != 'undefined' ? (
-          <>
-            <h3>{weatherData.name}</h3>
-            <p>{weatherData.weather[0].description}</p>
-            <p>Temp: {Math.round(weatherData.main.temp)}&#8451;</p>
-            <p>
-              Max: {Math.round(weatherData.main.temp_max)}&#8451; Min:{' '}
-              {Math.round(weatherData.main.temp_min)}&#8451;
-            </p>
-            <p>Pressure: {weatherData.main.pressure} hPa</p>
-            <p>
-              Sunrise: {new Date(weatherData.sys.sunrise * 1000).getHours()}:
-              {new Date(weatherData.sys.sunrise * 1000).getMinutes()}
-            </p>
-            <p>
-              Sunset: {new Date(weatherData.sys.sunset * 1000).getHours()}:
-              {new Date(weatherData.sys.sunset * 1000).getMinutes()}
-            </p>
-          </>
-        ) : (
-          ''
-        )}
-      </div>
+          {inputWord.length > 2 ? (
+            <StyledResults>
+              <ul>
+                {filterResults.length ? (
+                  filterResults.map((item, key) => (
+                    <li key={key} onClick={() => handleApi({ item })}>
+                      {item.name}, {item.country}
+                    </li>
+                  ))
+                ) : (
+                  <p>{inputWord}</p>
+                )}
+              </ul>
+            </StyledResults>
+          ) : (
+            ''
+          )}
+        </StyledInputWrapper>
+
+        <StyledWeather>
+          {typeof weatherData.main != 'undefined' ? (
+            <>
+              <StyledMainWeather>
+                <h2>
+                  {weatherData.name}, {weatherData.sys.country}
+                </h2>
+                <p>{weatherData.weather[0].description}</p>
+                <h3>{Math.round(weatherData.main.temp)}&#8451;</h3>
+                <p>
+                  Max: {Math.round(weatherData.main.temp_max)}&#8451; Min:{' '}
+                  {Math.round(weatherData.main.temp_min)}&#8451;
+                </p>
+              </StyledMainWeather>
+              <StyledAdditionalWeather>
+                <p>Pressure: {weatherData.main.pressure} hPa</p>
+                <span>
+                  Sunrise: {new Date(weatherData.sys.sunrise * 1000).getHours()}
+                  :{new Date(weatherData.sys.sunrise * 1000).getMinutes()}
+                </span>
+                <span>
+                  Sunset: {new Date(weatherData.sys.sunset * 1000).getHours()}:
+                  {new Date(weatherData.sys.sunset * 1000).getMinutes()}
+                </span>
+              </StyledAdditionalWeather>
+            </>
+          ) : (
+            <StyledNoData>
+              <p>{emptyCartMsg}</p>
+            </StyledNoData>
+          )}
+        </StyledWeather>
+      </StyledWrapper>
     </>
   );
 };
