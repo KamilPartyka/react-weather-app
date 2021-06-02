@@ -12,6 +12,7 @@ import {
 
 const APIkey = 'e6a65be06f3391d4b113444a0540b1dc';
 const localData = require('./data/current.city.list.min.json');
+const currentHour = new Date().getHours();
 
 const App = () => {
   const [inputWord, setInputWord] = useState('');
@@ -32,8 +33,6 @@ const App = () => {
       setWeatherData(data);
     } catch (err) {
       console.error(`błąd w Api: ${err.status}`);
-      if (err.status !== 404) {
-      }
     }
     setInputWord('');
   };
@@ -79,7 +78,7 @@ const App = () => {
           )}
         </StyledInputWrapper>
 
-        <StyledWeather>
+        <StyledWeather timeOfDay={currentHour}>
           {typeof weatherData.main != 'undefined' ? (
             <>
               <StyledMainWeather>

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import after_noon from './assets/after_noon.png';
+import night from './assets/night.png';
 
 export const StyledWrapper = styled.div`
   width: 100%;
@@ -12,24 +13,41 @@ export const StyledWrapper = styled.div`
 export const StyledInputWrapper = styled.div`
   margin-top: 20px;
   max-width: 400px;
-  width: 100%;
   position: relative;
 `;
 
 export const StyledInput = styled.input`
-  width: 100%;
-  padding: 10px;
+  width: 400px;
+  padding: 15px 10px;
+  box-shadow: 0px 5px 25px -4px rgb(0 0 0 / 50%);
+  border: 1px solid white;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+
+  ::placeholder {
+    color: black;
+  }
+
+  :focus {
+    background-color: #d6d6d6;
+    outline: none;
+    color: black;
+  }
+  :focus::placeholder {
+    color: black;
+  }
 `;
 
 export const StyledResults = styled.div`
   max-width: 400px;
   max-height: 400px;
-  overflow: auto;
-  border: 1px solid black;
-  border-top: none;
-  position: absolute;
-  background-color: white;
   width: 100%;
+  overflow: auto;
+  border: 1px solid white;
+  color: black;
+  position: absolute;
+  background-color: #d6d6d6;
+  box-shadow: 0px 10px 20px -5px rgb(0 0 0 / 50%);
 
   ul {
     list-style: none;
@@ -40,7 +58,7 @@ export const StyledResults = styled.div`
 
   li {
     cursor: pointer;
-    padding: 7px 0;
+    padding: 10px 0;
     padding-left: 10px;
   }
 
@@ -53,10 +71,28 @@ export const StyledResults = styled.div`
   }
 `;
 
+export const StyledNoData = styled.div`
+  height: 450px;
+
+  p {
+    font-size: 1.5rem;
+  }
+`;
+
 export const StyledWeather = styled.div`
+  @keyframes appear {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
   margin-top: 1rem;
   border-radius: 10px;
-  background-image: url(${after_noon});
+  background-image: ${({ timeOfDay }) =>
+    timeOfDay > 18 ? `url(${night})` : `url(${after_noon})`};
   background-position: center;
   max-width: 400px;
   height: 450px;
@@ -66,19 +102,13 @@ export const StyledWeather = styled.div`
   justify-content: center;
   align-items: center;
   color: white;
-  text-shadow: 2px 3px 5px rgb(0 0 0 / 50%);
+  text-shadow: 2px 3px 5px rgb(0 0 0 / 35%);
   box-shadow: 0px 10px 20px -5px rgb(0 0 0 / 50%);
 `;
 
-export const StyledNoData = styled.div`
-  height: 450px;
-
-  p {
-    font-size: 1.5rem;
-  }
-`;
-
 export const StyledMainWeather = styled.div`
+  animation: appear 0.5s ease;
+
   h2 {
     margin-bottom: 0;
     font-size: 2rem;
@@ -99,6 +129,7 @@ export const StyledMainWeather = styled.div`
 `;
 
 export const StyledAdditionalWeather = styled.div`
+  animation: appear 0.5s ease;
   margin-bottom: 2rem;
 
   p {
